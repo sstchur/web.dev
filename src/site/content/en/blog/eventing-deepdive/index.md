@@ -424,7 +424,7 @@ The above example will result in the following console output:
 ```
 
 Note that the third event handler never runs due to the fact that the second event handler calls
-`e.stopImmediatePropagation()`.
+`e.stopImmediatePropagation()`. If we had instead called `e.stopPropagation()`, the third handler would still run.
 
 ### `event.preventDefault()`
 
@@ -449,7 +449,7 @@ from navigating to the URL specified by the `<a>` element's `href` attribute? Th
 `preventDefault()` will do for you. Consider this example:
 
 ```html
-<a id="avett" href="http://www.theavettbrothers.com">The Avett Brothers</a>
+<a id="avett" href="https://www.theavettbrothers.com/welcome">The Avett Brothers</a>
 ```
 
 ```js
@@ -472,30 +472,26 @@ just play some of their music right here instead?"
 What other element/event combinations allow you to prevent the default action? I cannot possibly
 list them all, and sometimes you have to just experiment to see. But briefly, here are a few:
 
-- `<form> element + submit event`: `preventDefault()` for this combination will prevent a form from
-  submitting. This is useful if you want to perform validation and should something fail, you can
+- `<form>` element + "submit" event: `preventDefault()` for this combination will prevent a form from submitting. This is useful if you want to perform validation and should something fail, you can
   conditionally call preventDefault to stop the form from submitting.
 
-- `<a> element + click event`: `preventDefault()` for this combination prevents the browser from
+- `<a>` element + "click" event: `preventDefault()` for this combination prevents the browser from
   navigating to the URL specified in the `<a>` element's href attribute.
 
-- `document + mousewheel event`: `preventDefault()` for this combination prevents page scrolling
-  with the mousewheel (scrolling with keyboard would still work though) (NOTE: requires calling
-  `addEventListener()` with `{ passive: false }`).
+- `document` + "mousewheel" event: `preventDefault()` for this combination prevents page scrolling
+  with the mousewheel (scrolling with keyboard would still work though). <br>
+  <small>^ Note that this particular combination requires calling `addEventListener()` with `{ passive: false }`</small>.
 
-- `document + keydown event`: `preventDefault()` for this combination is lethal. It renders the page
-  largely useless, preventing keyboard scrolling, tabbing, and keyboard highlighting
+- `document` + "keydown" event: `preventDefault()` for this combination is lethal. It renders the page largely useless, preventing keyboard scrolling, tabbing, and keyboard highlighting.
 
-- `document + mousedown event`: `preventDefault()` for this combination will prevent text
+- `document` + "mousedown" event: `preventDefault()` for this combination will prevent text
   highlighting with the mouse and any other "default" action that one would invoke with a mouse
   down.
 
-- `input element + keypress event`: `preventDefault()` for this combination will prevent characters
-  typed by the user from reaching the input element.
+- `<input>` element + "keypress" event: `preventDefault()` for this combination will prevent characters typed by the user from reaching the input element (but please don't do this; there is rarely, if ever, a valid reason for it).
 
-- `document + contextmenu event`: `preventDefault()` for this combination prevents the native
-  browser context menu from appearing when a user right-clicks or long-presses (or any other way in
-  which a context menu might appear).
+- `document` + "contextmenu" event: `preventDefault()` for this combination prevents the native
+  browser context menu from appearing when a user right-clicks or long-presses (or any other way in which a context menu might appear).
 
 This is not an exhaustive list by any means, but hopefully it gives you a good idea of how
 `preventDefault()` can be used.
@@ -534,6 +530,9 @@ render the page useless. They simply prevent events from getting where they woul
 But we also call `preventDefault()`, which you'll recall prevents the default _action_. So any
 default actions (like mousewheel scroll, keyboard scroll or highlight or tabbing, link clicking,
 context menu display, etc.) are all prevented, thus leaving the page in a fairly useless state.
+
+## Live Demos
+All of the examples in this article have corresponding live demos which you can explore on Glitch: [JavaScript Eventing Deep-dive Demos](https://silicon-brawny-cardinal.glitch.me)
 
 ## Acknowledgements
 
