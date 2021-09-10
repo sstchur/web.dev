@@ -21,14 +21,12 @@ origin_trial:
   url: https://developer.chrome.com/origintrials/#/view_trial/-6682215947110973439
 ---
 
-`preventDefault` and `stopPropagationEvent` handling in JavaScript is usually fairly
-straightforward. Occasionally though, people get a little tripped up between `preventDefault` and
-`stopPropagation`, when to use which one and what exactly each method does. This article explains
-both with the goal of ending your confusion once and for all.
+### Event.stopPropagation() and Event.preventDefault()
 
-Before even beginning a discussion of `preventDefault` or `stopPropagation` it's important to
-briefly touch on the two kinds of event handling possible in JavaScript (in all modern browsers that
-is—IE prior to version 9 did not support event capturing).
+JavaScript event handling is often straightforward. This is especially true when dealing with a simple (relatively flat) HTML structure. Things get a bit more involved though when events are traveling (or propagating) through a hierarchy of elements. This is typically when developers reach for `stopPropagation()` and/or `preventDefault()` to solve the problems they're experiencing. If you've ever thought to yourself "I'll just try `preventDefault()` and if that doens't work I'll try `stopPropagation()` and if that doesn't work, I'll try both," then this article is for you! I will explain exactly what each method does, when to use which one, and provide you with a variety of working examples for you to explore. My goal is to end your confusion once and for all.
+
+Before we dive too deeply though, it's important to briefly touch on the two kinds of event handling possible in JavaScript (in all modern browsers that
+is — IE prior to version 9 did not support event capturing at all).
 
 ### Eventing Styles (Capturing and Bubbling)
 
@@ -36,22 +34,17 @@ All modern browsers support event capturing, but it is very rarely used by devel
 Interestingly, it was the only form of eventing that Netscape originally supported. Netscape's
 biggest rival, Microsoft Internet Explorer, did not support event capturing at all, but rather, only
 supported another style of eventing called event bubbling. When the W3C was formed, they found merit
-in both styles of eventing and declared that browsers should support both, via a parameter to the
-`addEventListener` method. That parameter is the third parameter, after the event type and the event
-delegate, as follows:
+in both styles of eventing and declared that browsers should support both, via a third parameter to the
+`addEventListener` method. Originally, that parameter was just a boolean, but all modern browsers support an `options` object as the third parameter, which you can use to specify (among other things) if you want to use event capturing or not:
 
 ```js
-someElement.addEventListener('click', myClickHandler, useCapture);
+someElement.addEventListener('click', myClickHandler, { capture: true|false });
 ```
 
-It's that third parameter, `useCapture`, which determines if your event listener will listen in the
-capturing or the bubbling phase. Possible values are `true | false`. The default value is `false`
-meaning that event bubbling will be used most of the time.
+Note that the `options` object is optional, as is its `capture` property. If either is omitted, the default value for `capture` is `false`, meaning event bubbling will be used.
 
-{% Aside %} The above syntax for `addEventListener` is the legacy syntax still commonly in use and
-well supported by all major browsers. Alternatively, one can use the newer syntax which takes an
-[`options object`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener) as
-the third parameter, instead of a boolean. {% endAside %}
+{% Aside %} For more details about `addEventListener`, including its legacy syntax, see 
+[`EventTarget.addEventListener`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener). {% endAside %}
 
 #### Event Capturing
 
@@ -59,8 +52,8 @@ What does it mean if your event handler is "listening in the capturing phase?" T
 we need to know how events originate and how they travel. The following is true of _all_ events,
 even if you, as the developer, don't leverage it, care about it, or think about it.
 
-All events begin at the document and first go through the capturing phase. This means that when an
-event is dispatched, it starts the document and travels "downwards" towards its target element
+All events begin at the window and first go through the capturing phase. This means that when an
+event is dispatched, it starts the window and travels "downwards" towards its target element
 _first_. This happens even if you are only listening in the bubbling phase. Consider the following
 example markup and JavaScript:
 
@@ -86,7 +79,7 @@ document.getElementById('C').addEventListener(
 );
 ```
 
-When a user clicks on element `#C`, an event, which originates at the `window`, is dispatched. This
+When a user clicks on element `#C`, an event, originating at the `window`, is dispatched. This
 event will then propagate through its descendants as follows:
 
 `window` => `document` => `<html>` => `<body>` => and so on, until it reaches the target.
@@ -162,7 +155,7 @@ Finally, the `window`: "Is anything listening for click events on the window in 
 
 Phew! That was a long journey, and our event is probably very tired by now, but believe it or not,
 that is the journey every event goes through! Most of the time, this is never noticed because
-developers typically are only interested in one event phase or the other (and typically it is the
+developers are typically only interested in one event phase or the other (and it is usually the
 bubbling phase).
 
 It's worth spending some time playing around with event capturing and event bubbling and logging
@@ -372,12 +365,12 @@ this point, you should be able to predict pretty accurately.
 
 ### `event.stopImmediatePropagation()`
 
-What is this strange, and not oft-used method? It's similar to stopPropagation, but rather than
+What is this strange, and not oft-used method? It's similar to `stopPropagation`, but rather than
 stopping an event from traveling to descendents (capturing) or ancestors (bubbling), this method
 only applies when you have more than one event handler wired up to a single element. Since
 `addEventListener()` supports a multicast style of eventing, it's completely possible to wire up an
 event handler to a single element more than once. When this happens, (in most browsers), event
-handlers are typically executed in the order they were wired up. Calling
+handlers are executed in the order they were wired up. Calling
 `stopImmediatePropagation()` prevents any subsequent handlers from firing. Consider the following
 example:
 
@@ -480,7 +473,7 @@ list them all, and sometimes you have to just experiment to see. But briefly, he
 
 - `document` + "mousewheel" event: `preventDefault()` for this combination prevents page scrolling
   with the mousewheel (scrolling with keyboard would still work though). <br>
-  <small>^ Note that this particular combination requires calling `addEventListener()` with `{ passive: false }`</small>.
+  <small>^ This requires calling `addEventListener()` with `{ passive: false }`</small>.
 
 - `document` + "keydown" event: `preventDefault()` for this combination is lethal. It renders the page largely useless, preventing keyboard scrolling, tabbing, and keyboard highlighting.
 
